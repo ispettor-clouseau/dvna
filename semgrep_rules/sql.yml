@@ -1,0 +1,28 @@
+rules:
+  - id: javascript-sql-injection-sequelize
+    message: >-
+      È stata rilevata una potenziale SQL injection. L'input dell'utente viene
+      concatenato direttamente in una query SQL. Utilizzare query parametrizzate
+      o un ORM con sanificazione automatica per prevenire questa vulnerabilità.
+    severity: ERROR
+    languages:
+      - javascript
+      - typescript
+    pattern-either:
+      - pattern: |
+          db.sequelize.query("..." + $INPUT + "...", ...)
+      - pattern: |
+          var query = "..." + $INPUT + "...";
+          db.sequelize.query(query, ...);
+      - pattern: |
+          var query = "...";
+          query += $INPUT;
+          query += "...";
+          db.sequelize.query(query, ...);
+    metavariable-regex:
+      metavariable: $INPUT
+      regex: .*req\.(body|query|params).*
+    metadata:
+      category: security
+      cwe: "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      owasp: "A03:2021 - Injection"
