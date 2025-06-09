@@ -6,7 +6,7 @@ var libxmljs = require("libxmljs");
 var serialize = require("node-serialize")
 const Op = db.Sequelize.Op
 
-module.exports.userSearch = function (req, res) {
+module.exports.userSearch = function (req, res) {	
 	var query = "SELECT name,id FROM Users WHERE login='" + req.body.login + "'";
 	db.sequelize.query(query, {
 		model: db.User
@@ -34,6 +34,37 @@ module.exports.userSearch = function (req, res) {
 		})
 	})
 }
+
+// module.exports.userSearch = function (req, res) {
+//   const login = req.body.login;
+
+//   // Usa i bind parameters per evitare SQL Injection
+//   const query = "SELECT name, id, ciao FROM Users WHERE login = :login";
+
+//   db.sequelize.query(query, {
+//     replacements: { login },
+//     model: db.User,
+//     mapToModel: true // necessario per restituire istanze di modello Sequelize
+//   }).then(user => {
+//     if (user.length) {
+//       const output = {
+//         user: {
+//           name: user[0].name,
+//           id: user[0].id
+//         }
+//       };
+//       res.render('app/usersearch', { output });
+//     } else {
+//       req.flash('warning', 'User not found');
+//       res.render('app/usersearch', { output: null });
+//     }
+//   }).catch(err => {
+//     console.error("DB error:", err); // Logga per il debug
+//     req.flash('danger', 'Internal Error');
+//     res.render('app/usersearch', { output: null });
+//   });
+// };
+
 
 module.exports.ping = function (req, res) {
 	exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {

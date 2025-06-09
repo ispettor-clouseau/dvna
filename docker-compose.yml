@@ -10,6 +10,7 @@ services:
       - 9090:9090
     volumes:
       - .:/app
+      - /app/node_modules
     depends_on:
       - mysql-db
     env_file:
@@ -17,8 +18,6 @@ services:
 
   mysql-db:
     image: biarms/mysql:5.7
-    volumes:
-      - ./db:/var/lib/mysql
     expose:
       - "3306"
     env_file:
