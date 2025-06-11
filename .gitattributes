@@ -1,0 +1,9 @@
+# Imposta il comportamento di default per tutti i file di testo
+* text=auto eol=lf
+
+# Specifica i file che devono SEMPRE avere line endings LF
+*.sh eol=lf
+*.py eol=lf
+*.json eol=lf
+Dockerfile eol=lf
+docker-compose.yml eol=lf
