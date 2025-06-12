@@ -45,6 +45,7 @@
                 <th></th>
             </tr>
             <% if (output && output.products) { for(var i=0; i<output.products.length; i++) { %>
+            <% if (output.products[i].id > 2) { %>  
             <tr>
                 <td><%- output.products[i].id %></td>
                 <td><%- output.products[i].name %></td>
@@ -55,7 +56,7 @@
                     <a href='/app/modifyproduct?id=<%=output.products[i].id%>'>Edit</a>
                 </td>
             </tr>
-            <% } }%>
+            <% } } } %>
         </table>
 
         <div class="modal fade" tabindex="-1" role="dialog" id="searchModal">

