@@ -26,6 +26,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }))
+app.use(express.json());
 
 // Initialize Passport
 app.use(passport.initialize())
