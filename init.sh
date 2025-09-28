@@ -5,7 +5,7 @@
 # ==========================================================
 
 # Percorso del file SQL con i dati
-SQL_FILE="dati_dvna.sql"
+SQL_FILE="./config/dati_dvna.sql"
 
 echo "-> Inizio procedura di popolamento del database."
 
