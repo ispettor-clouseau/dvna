@@ -1,0 +1,39 @@
+rules:
+  - id: javascript-express-reflected-xss-req-body-name-nested
+    message: >-
+      Potenziale XSS riflessa. L'input dell'utente da `req.body.name` (letto in `$DATA_OBJECT.$TAINTED_KEY`)
+      viene passato a `res.render` attraverso un oggetto intermedio (`$DATA_OBJECT`) che è a sua volta
+      una proprietà (`$RENDER_KEY`) dell'oggetto dati di rendering.
+      Assicurati che l'output (es. `$DATA_OBJECT.$TAINTED_KEY`) sia correttamente codificato nel template.
+    severity: WARNING
+    languages:
+      - javascript
+      - typescript
+    metadata:
+      category: security
+      subcategory: xss
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      technology:
+        - express
+    patterns:
+      - pattern-inside: |
+          module.exports.$FUNC = function (req, res) {
+            ...
+          };
+      - pattern: |
+          $DATA_OBJECT = {
+            ...,
+            $TAINTED_KEY: req.body.name,
+            ...
+          };
+          ...
+          res.render($TEMPLATE_NAME, {
+            ...,
+            $RENDER_KEY: $DATA_OBJECT,
+            ...
+          });
+    metavariables:
+      $TAINTED_KEY:
+        regex: (searchTerm|query|input|search|name|value|term) # Chiave che contiene il dato "tainted"
+      $RENDER_KEY:
+        regex: (output|data|context|params|pageData) # Chiave nell'oggetto passato a res.render che contiene l'oggetto intermedio

@@ -1,0 +1,14 @@
+rules:
+  - id: nodejs-command-injection-express
+    languages: [javascript]
+    message: >
+      Possibile command injection: input utente non validato viene usato per costruire comandi shell.
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-78"
+    patterns:
+      - pattern-either:
+        - pattern: exec("..." + req.body.$ANY, ...)
+        - pattern: exec("..." + req.query.$ANY, ...)
+        - pattern: exec("..." + req.params.$ANY, ...)

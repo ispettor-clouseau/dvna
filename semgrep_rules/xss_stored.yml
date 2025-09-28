@@ -1,0 +1,39 @@
+rules:
+  - id: javascript-express-stored-xss-via-save
+    message: >-
+      I dati provenienti da `req.body.$INPUT_FIELD` vengono assegnati a `$MODEL_INSTANCE.$PROPERTY`
+      e successivamente salvati nel database tramite `$MODEL_INSTANCE.save()`.
+      Se questi dati non vengono sanitizzati/codificati correttamente quando vengono letti e
+      visualizzati in altre parti dell'applicazione, ciò potrebbe portare a una vulnerabilità XSS Stored.
+      Verificare che tutti gli output di questi dati siano sicuri.
+    severity: WARNING
+    languages:
+      - javascript
+      - typescript
+    metadata:
+      category: security
+      subcategory: xss
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021-Injection"
+      technology:
+        - express
+        - sequelize # o un altro ORM che usa .save()
+    patterns:
+      - pattern-inside: |
+          module.exports.$FUNC = function (req, res) {
+            ...
+          };
+      - pattern: |
+          $MODEL_INSTANCE.$PROPERTY = req.body.$INPUT_FIELD;
+          ...
+          $MODEL_INSTANCE.save(...);
+    metavariables:
+      $INPUT_FIELD:
+        regex: (code|name|description|tags|title|comment|content|body|message|profile|bio|setting|url) # Elenco di campi di input comuni
+      $PROPERTY:
+        # Corrisponde a qualsiasi nome di proprietà JavaScript valido
+        regex: "[a-zA-Z_$][a-zA-Z0-9_$]*"
+      $MODEL_INSTANCE:
+        # Corrisponde a qualsiasi nome di variabile JavaScript valido
+        regex: "[a-zA-Z_$][a-zA-Z0-9_$]*"
+    focus-metavariable: $PROPERTY # Puoi cambiare il focus se preferisci, es. $INPUT_FIELD
