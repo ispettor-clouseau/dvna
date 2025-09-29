@@ -36,7 +36,6 @@ if [ $? -eq 0 ]; then
     echo "✅ Successo! Il database '$MYSQL_DATABASE' è stato popolato correttamente."
 else
     echo "❌ ERRORE durante l'esecuzione dello script SQL. Controllare i log."
-    exit 1
 fi
 
 npm start

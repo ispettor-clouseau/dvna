@@ -3,59 +3,87 @@ document.addEventListener('DOMContentLoaded', () => {
     const addProductForm = document.getElementById('addProductForm');
     const messagesContainer = document.getElementById('messages-container');
 
+    // <-- INSERITA QUI: La nostra funzione di sanificazione
+    function sanitizeInput(input) {
+        if (input === null || input === undefined) {
+            return input;
+        }
+        const strInput = String(input);
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            "/": '&#x2F;',
+        };
+        const reg = /[&<>"'/]/ig;
+        return strInput.replace(reg, (match) => (map[match]));
+    }
+
     /**
-     * Helper function to display messages to the user.
-     * @param {string} message The message to display.
-     * @param {string} type The type of message (success, danger, warning).
+     * Funzione sicura per mostrare messaggi all'utente.
+     * @param {string} message Il messaggio da mostrare.
+     * @param {string} type Il tipo di messaggio (success, danger, warning).
      */
     function showMessage(message, type = 'info') {
-        const messageElement = `<div class="alert alert-${type}">${message}</div>`;
+        // <-- CORREZIONE CRUCIALE: Sanifichiamo il messaggio prima di inserirlo nell'HTML.
+        const cleanMessage = sanitizeInput(message);
+        const messageElement = `<div class="alert alert-${type}">${cleanMessage}</div>`;
         messagesContainer.innerHTML = messageElement;
     }
 
-    // Add a listener for the form's submit event
+    // Aggiungiamo l'evento al form
     addProductForm.addEventListener('submit', async (event) => {
-        // Prevent the default browser action of reloading the page
         event.preventDefault();
 
-        // 1. Gather the data from the form fields
+        // 1. Raccogli i dati dal form
         const productData = {
             name: document.getElementById('productName').value,
             code: document.getElementById('productCode').value,
             tags: document.getElementById('productTags').value,
             description: document.getElementById('productDescription').value,
         };
+        
+        // 2. (Buona pratica) Sanifica i dati anche prima di inviarli
+        const cleanProductData = {
+            name: sanitizeInput(productData.name),
+            code: sanitizeInput(productData.code),
+            tags: sanitizeInput(productData.tags),
+            description: sanitizeInput(productData.description)
+        };
 
-        // 2. Send the data to the API endpoint
+        // 3. Invia i dati sanificati all'API
         try {
             const response = await fetch('/api/products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(productData)
+                body: JSON.stringify(cleanProductData) // <-- Usiamo i dati puliti
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                // If the server returns an error, display it
+                // L'errore che arriva dal server viene gestito in modo sicuro da showMessage
                 throw new Error(result.error || 'Si è verificato un errore.');
             }
             
-            // 3. Handle a successful response
-            // Show a success message
+            // 4. Gestisci la risposta di successo
             showMessage('Prodotto aggiunto con successo! Sarai reindirizzato alla lista.', 'success');
 
-            // Redirect to the product list page after 2 seconds
             setTimeout(() => {
-                window.location.href = '/products.html'; // Redirects to index.html
+                // NOTA: Se l'URL di reindirizzamento dipendesse da un input,
+                // anche quello andrebbe validato/sanificato! In questo caso è sicuro.
+                window.location.href = '/app/products'; 
             }, 2000);
 
 
         } catch (error) {
-            // 4. Handle a failed response
+            // 5. Gestisci la risposta di errore
             console.error('Errore durante l\'invio del prodotto:', error);
+            // La nostra funzione showMessage ora è sicura e sanificherà il messaggio d'errore.
             showMessage(error.message, 'danger');
         }
     });

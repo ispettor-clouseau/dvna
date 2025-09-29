@@ -19,21 +19,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Crea una riga per ogni prodotto
+        // Crea una riga per ogni prodotto in modo sicuro
         products.forEach(product => {
-            const row = `
-                <tr>
-                    <td>${product.id}</td>
-                    <td>${product.name}</td>
-                    <td>${product.code}</td>
-                    <td>${product.tags}</td>
-                    <td>${product.description}</td>
-                </tr>
-            `;
-            // <td>
-            //     <a href='/pagina_modifica_prodotto.html?id=${product.id}'>Modifica</a>
-            // </td>
-            productsTableBody.innerHTML += row;
+            // 1. Crea l'elemento <tr>
+            const row = document.createElement('tr');
+
+            // 2. Crea e aggiungi ogni <td> usando textContent per prevenire XSS
+            const idCell = document.createElement('td');
+            idCell.textContent = product.id;
+            row.appendChild(idCell);
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = product.name;
+            row.appendChild(nameCell);
+
+            const codeCell = document.createElement('td');
+            codeCell.textContent = product.code;
+            row.appendChild(codeCell);
+
+            const tagsCell = document.createElement('td');
+            tagsCell.textContent = product.tags;
+            row.appendChild(tagsCell);
+
+            const descriptionCell = document.createElement('td');
+            descriptionCell.textContent = product.description;
+            row.appendChild(descriptionCell);
+
+            // Esempio per il link di modifica (se necessario)
+            // const actionsCell = document.createElement('td');
+            // const editLink = document.createElement('a');
+            // editLink.href = `/pagina_modifica_prodotto.html?id=${product.id}`;
+            // editLink.textContent = 'Modifica';
+            // actionsCell.appendChild(editLink);
+            // row.appendChild(actionsCell);
+
+            // 3. Aggiungi la riga completa al corpo della tabella
+            productsTableBody.appendChild(row);
         });
     }
 
@@ -42,28 +63,54 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} message - Il testo del messaggio
      * @param {string} type - Il tipo di messaggio (success, danger, warning, info)
      */
+    // function showMessage(message, type = 'info') {
+    //     const messageElement = `
+    //         <div class="alert alert-${type}">${message}</div>
+    //     `;
+    //     messagesContainer.innerText = messageElement;
+    // }
     function showMessage(message, type = 'info') {
-        const messageElement = `
-            <div class="alert alert-${type}">${message}</div>
-        `;
-        messagesContainer.innerHTML = messageElement;
+        messagesContainer.innerHTML = ''; // Pulisci i messaggi precedenti
+
+        const messageElement = document.createElement('div');
+        messageElement.className = `alert alert-${type}`;
+
+        // Usa textContent per inserire il messaggio in modo sicuro
+        messageElement.textContent = message;
+
+        messagesContainer.appendChild(messageElement);
     }
-    
+
     /**
      * Funzione per mostrare il termine di ricerca usato
      * @param {string} searchTerm - Il termine cercato
      */
     function showSearchTerm(searchTerm) {
-        const searchElement = `
-            <p class="bg-success">
-                Elenco prodotti per la ricerca: <strong>${searchTerm}</strong>
-                &nbsp; &nbsp;
-                <small><a href="#" id="clear-search-link">
-                    <i class="fa fa-remove"></i> Pulisci
-                </a></small>
-            </p>
-        `;
-        messagesContainer.innerHTML = searchElement;
+        // Pulisci i messaggi precedenti in modo sicuro
+        messagesContainer.innerHTML = '';
+
+        // 1. Crea gli elementi del DOM programmaticamente
+        const searchElement = document.createElement('p');
+        searchElement.className = 'bg-success p-2'; // Aggiungo un po' di padding per stile
+
+        const strongElement = document.createElement('strong');
+
+        // 2. Usa textContent per inserire il dato variabile (searchTerm)
+        strongElement.textContent = searchTerm;
+
+        const clearLink = document.createElement('a');
+        clearLink.href = '#';
+        clearLink.id = 'clear-search-link';
+        // innerHTML qui è sicuro perché il contenuto è statico e controllato da te
+        clearLink.innerHTML = ' <small><i class="fa fa-remove"></i> Pulisci</small>';
+
+        // 3. Componi l'elemento finale
+        searchElement.append('Elenco prodotti per la ricerca: ');
+        searchElement.appendChild(strongElement);
+        searchElement.appendChild(clearLink);
+
+        // 4. Aggiungi l'elemento sicuro al contenitore
+        messagesContainer.appendChild(searchElement);
 
         // Aggiungi un listener per il link "Pulisci"
         document.getElementById('clear-search-link').addEventListener('click', (e) => {
@@ -92,11 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Errore di rete nella richiesta dei prodotti.');
             }
             const data = await response.json(); // L'API dovrebbe restituire JSON
-            
+
             // Nel tuo template EJS, i dati erano in 'output.products'
             // Assumiamo che la nostra API restituisca direttamente un array di prodotti
             renderProducts(data.products);
-            
+
         } catch (error) {
             console.error('Errore:', error);
             showMessage('Impossibile caricare i prodotti.', 'danger');
@@ -107,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchForm.addEventListener('submit', (event) => {
         // Impedisce il ricaricamento della pagina
         event.preventDefault();
-        
+
         const searchTerm = searchInput.value.trim();
         if (searchTerm) {
             fetchProducts(searchTerm);
